@@ -1,0 +1,1694 @@
+<!DOCTYPE html>
+<html lang="zh-HK">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>木蘭詩體裁探究偵探</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrious/4.0.2/qrious.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+        
+        body {
+            font-family: "Microsoft JhengHei", "PingFang TC", sans-serif;
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            min-height: 100vh;
+            color: #fff;
+            overflow-x: hidden;
+        }
+        
+        .screen {
+            display: none;
+            padding: 20px;
+            max-width: 800px;
+            margin: 0 auto;
+            animation: fadeIn 0.5s;
+        }
+        
+        .screen.active {
+            display: block;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        /* 登入畫面 */
+        #login-screen {
+            text-align: center;
+            padding-top: 15vh;
+        }
+        
+        .game-title {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            text-shadow: 3px 3px 6px rgba(0,0,0,0.3);
+        }
+        
+        .game-subtitle {
+            font-size: 1.2em;
+            opacity: 0.9;
+            margin-bottom: 40px;
+        }
+        
+        .input-group {
+            margin: 20px auto;
+            max-width: 300px;
+        }
+        
+        .input-group input {
+            width: 100%;
+            padding: 15px;
+            font-size: 1.1em;
+            border: none;
+            border-radius: 10px;
+            background: rgba(255,255,255,0.95);
+            color: #333;
+            text-align: center;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+            border: none;
+            padding: 15px 40px;
+            font-size: 1.2em;
+            border-radius: 30px;
+            cursor: pointer;
+            margin-top: 20px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+            transition: transform 0.2s;
+        }
+        
+        .btn-primary:active {
+            transform: scale(0.95);
+        }
+        
+        .btn-secondary {
+            background: rgba(255,255,255,0.2);
+            color: white;
+            border: 2px solid white;
+            padding: 10px 25px;
+            font-size: 1em;
+            border-radius: 20px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        
+        .btn-warning {
+            background: linear-gradient(135deg, #f6d365 0%, #fda085 100%);
+            color: #333;
+            border: none;
+            padding: 15px 40px;
+            font-size: 1.2em;
+            border-radius: 30px;
+            cursor: pointer;
+            margin-top: 20px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+        }
+        
+        /* 規則說明 */
+        .rules-box {
+            background: rgba(255,255,255,0.15);
+            border: 2px solid rgba(255,255,255,0.3);
+            border-radius: 15px;
+            padding: 20px;
+            margin: 20px auto;
+            max-width: 500px;
+            text-align: left;
+        }
+        
+        .rules-box h3 {
+            text-align: center;
+            margin-bottom: 15px;
+            color: #f093fb;
+        }
+        
+        .rules-box ul {
+            margin-left: 20px;
+            line-height: 1.8;
+        }
+        
+        .rules-box li {
+            margin-bottom: 8px;
+        }
+        
+        .highlight {
+            color: #f6d365;
+            font-weight: bold;
+        }
+        
+        /* 地圖畫面 */
+        #map-screen {
+            padding-top: 10px;
+        }
+        
+        .player-stats {
+            background: rgba(0,0,0,0.3);
+            padding: 15px;
+            border-radius: 15px;
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-around;
+            flex-wrap: wrap;
+        }
+        
+        .stat-item {
+            text-align: center;
+            margin: 5px;
+        }
+        
+        .stat-label {
+            font-size: 0.8em;
+            opacity: 0.8;
+        }
+        
+        .stat-value {
+            font-size: 1.5em;
+            font-weight: bold;
+        }
+        
+        .islands-container {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        
+        .island {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 20px;
+            padding: 20px 15px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            position: relative;
+            min-height: 140px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .island:hover, .island:active {
+            transform: scale(1.05);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        }
+        
+        .island.locked {
+            background: linear-gradient(135deg, #2c3e50 0%, #4a5568 100%);
+            opacity: 0.6;
+            pointer-events: none;
+        }
+        
+        .island.completed {
+            background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+        }
+        
+        .island.failed {
+            background: linear-gradient(135deg, #eb3349 0%, #f45c43 100%);
+            animation: shake 0.5s;
+        }
+        
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-10px); }
+            75% { transform: translateX(10px); }
+        }
+        
+        .island-icon {
+            font-size: 3em;
+            margin-bottom: 10px;
+        }
+        
+        .island-name {
+            font-size: 1.1em;
+            font-weight: bold;
+        }
+        
+        .island-desc {
+            font-size: 0.8em;
+            opacity: 0.9;
+            margin-top: 5px;
+        }
+        
+        .stamp {
+            position: absolute;
+            top: -10px;
+            right: -10px;
+            font-size: 2.5em;
+            background: white;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.2);
+            animation: stampPop 0.5s;
+        }
+        
+        @keyframes stampPop {
+            0% { transform: scale(0) rotate(-180deg); }
+            100% { transform: scale(1) rotate(0deg); }
+        }
+        
+        .retry-badge {
+            position: absolute;
+            top: -10px;
+            left: -10px;
+            background: #f45c43;
+            color: white;
+            padding: 5px 10px;
+            border-radius: 15px;
+            font-size: 0.75em;
+            font-weight: bold;
+        }
+        
+        .boss-gate {
+            grid-column: span 2;
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            padding: 30px;
+            border-radius: 20px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .boss-gate.locked {
+            background: linear-gradient(135deg, #2c3e50 0%, #4a5568 100%);
+            pointer-events: none;
+        }
+        
+        .boss-gate.unlocked {
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { box-shadow: 0 0 0 0 rgba(240, 147, 251, 0.4); }
+            50% { box-shadow: 0 0 0 20px rgba(240, 147, 251, 0); }
+        }
+        
+        .action-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        
+        /* 關卡畫面 */
+        #level-screen {
+            padding-top: 10px;
+        }
+        
+        .level-header {
+            background: rgba(0,0,0,0.3);
+            padding: 15px;
+            border-radius: 15px;
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: rgba(255,255,255,0.2);
+            border-radius: 4px;
+            margin-top: 10px;
+            overflow: hidden;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #f093fb, #f5576c);
+            transition: width 0.3s;
+        }
+        
+        .attempts-indicator {
+            background: rgba(255,255,255,0.2);
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-size: 0.9em;
+            margin-top: 5px;
+        }
+        
+        .attempts-indicator.danger {
+            background: rgba(244, 92, 67, 0.3);
+            color: #ffcccb;
+        }
+        
+        .question-container {
+            background: rgba(255,255,255,0.1);
+            padding: 20px;
+            border-radius: 15px;
+            margin-bottom: 20px;
+        }
+        
+        .question-text {
+            font-size: 1.2em;
+            line-height: 1.6;
+            margin-bottom: 20px;
+        }
+        
+        .question-poem {
+            background: rgba(0,0,0,0.2);
+            padding: 15px;
+            border-radius: 10px;
+            margin: 15px 0;
+            font-style: italic;
+            text-align: center;
+            line-height: 1.8;
+        }
+        
+        .options {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        
+        .option-btn {
+            background: rgba(255,255,255,0.15);
+            border: 2px solid rgba(255,255,255,0.3);
+            color: white;
+            padding: 15px;
+            border-radius: 12px;
+            cursor: pointer;
+            text-align: left;
+            font-size: 1em;
+            transition: all 0.2s;
+        }
+        
+        .option-btn:hover, .option-btn:active {
+            background: rgba(255,255,255,0.25);
+            border-color: rgba(255,255,255,0.6);
+        }
+        
+        .option-btn.correct {
+            background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+            border-color: #38ef7d;
+        }
+        
+        .option-btn.wrong {
+            background: linear-gradient(135deg, #eb3349 0%, #f45c43 100%);
+            border-color: #f45c43;
+        }
+        
+        .option-btn.disabled {
+            pointer-events: none;
+            opacity: 0.6;
+        }
+        
+        /* 配對題樣式 */
+        .matching-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin: 20px 0;
+        }
+        
+        .matching-item {
+            background: rgba(255,255,255,0.15);
+            padding: 15px;
+            border-radius: 10px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s;
+            border: 2px solid transparent;
+        }
+        
+        .matching-item.selected {
+            border-color: #f093fb;
+            background: rgba(240, 147, 251, 0.3);
+        }
+        
+        .matching-item.matched {
+            background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+            pointer-events: none;
+        }
+        
+        /* 創作題樣式 */
+        .creative-input {
+            width: 100%;
+            padding: 15px;
+            font-size: 1.1em;
+            border: 2px solid rgba(255,255,255,0.3);
+            border-radius: 10px;
+            background: rgba(255,255,255,0.95);
+            color: #333;
+            margin: 10px 0;
+            font-family: inherit;
+        }
+        
+        .creative-hint {
+            background: rgba(255,255,255,0.1);
+            padding: 15px;
+            border-radius: 10px;
+            margin: 15px 0;
+            font-size: 0.95em;
+        }
+        
+        /* 結果畫面 */
+        .result-screen {
+            text-align: center;
+            padding: 30px 20px;
+        }
+        
+        .result-icon {
+            font-size: 5em;
+            margin-bottom: 20px;
+        }
+        
+        .result-title {
+            font-size: 1.8em;
+            margin-bottom: 15px;
+        }
+        
+        .result-stats {
+            background: rgba(0,0,0,0.2);
+            padding: 20px;
+            border-radius: 15px;
+            margin: 20px 0;
+            text-align: left;
+        }
+        
+        .result-stats .stat-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 0;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+        
+        .result-message {
+            font-size: 1.1em;
+            line-height: 1.6;
+            margin: 20px 0;
+            padding: 15px;
+            border-radius: 10px;
+        }
+        
+        .result-message.success {
+            background: rgba(17, 153, 142, 0.3);
+        }
+        
+        .result-message.fail {
+            background: rgba(235, 51, 73, 0.3);
+        }
+        
+        /* QR碼畫面 */
+        #qr-screen {
+            text-align: center;
+            padding-top: 10vh;
+        }
+        
+        #qr-canvas {
+            margin: 20px auto;
+            background: white;
+            padding: 20px;
+            border-radius: 15px;
+        }
+        
+        .qr-instruction {
+            background: rgba(255,255,255,0.1);
+            padding: 20px;
+            border-radius: 15px;
+            margin: 20px 0;
+            text-align: left;
+        }
+        
+        /* 排行榜 */
+        .leaderboard {
+            background: rgba(0,0,0,0.3);
+            border-radius: 15px;
+            padding: 20px;
+            margin-top: 20px;
+        }
+        
+        .leaderboard-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+        
+        .leaderboard-item.top3 {
+            background: linear-gradient(90deg, rgba(255,215,0,0.3), transparent);
+            border-radius: 8px;
+        }
+        
+        /* 響應式 */
+        @media (max-width: 480px) {
+            .game-title { font-size: 1.8em; }
+            .islands-container { grid-template-columns: 1fr; }
+            .boss-gate { grid-column: span 1; }
+            .matching-container { grid-template-columns: 1fr; }
+        }
+        
+        .bounce {
+            animation: bounce 0.5s;
+        }
+        
+        @keyframes bounce {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+    </style>
+</head>
+<body>
+    <!-- 登入畫面 -->
+    <div id="login-screen" class="screen active">
+        <div class="game-title">🕵️ 木蘭詩體裁探究偵探</div>
+        <div class="game-subtitle">解開樂府詩的五大秘密，成為鑑賞大師！</div>
+        
+        <div class="rules-box">
+            <h3>📜 遊戲規則</h3>
+            <ul>
+                <li>共有<span class="highlight">5個島嶼</span>，每島3道題目</li>
+                <li>必須<span class="highlight">答對過半數</span>才能進入下一島</li>
+                <li><span class="highlight">錯誤過半</span>需重新挑戰該島所有題目</li>
+                <li>集滿5個印章，解鎖<span class="highlight">最終Boss挑戰</span></li>
+                <li>遊戲進度自動儲存，可隨時繼續</li>
+            </ul>
+        </div>
+        
+        <div class="input-group">
+            <input type="text" id="player-name" placeholder="輸入你的姓名" maxlength="10">
+        </div>
+        <div class="input-group">
+            <input type="text" id="player-class" placeholder="班別（如：1A）" maxlength="5">
+        </div>
+        
+        <button class="btn-primary" onclick="startGame()">🚀 開始偵探之旅</button>
+        <br><br>
+        <button class="btn-secondary" onclick="loadGame()">📂 繼續上回進度</button>
+    </div>
+
+    <!-- 地圖畫面 -->
+    <div id="map-screen" class="screen">
+        <div class="player-stats">
+            <div class="stat-item">
+                <div class="stat-label">🕵️ 偵探</div>
+                <div class="stat-value" id="display-name">-</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-label">🏆 積分</div>
+                <div class="stat-value" id="display-score">0</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-label">📜 印章</div>
+                <div class="stat-value" id="display-stamps">0/5</div>
+            </div>
+        </div>
+
+        <div class="islands-container">
+            <div class="island" id="island-0" onclick="enterIsland(0)">
+                <div class="island-icon">🏝️</div>
+                <div class="island-name">韻律島</div>
+                <div class="island-desc">押韻與換韻技巧<br>3道題目</div>
+            </div>
+            
+            <div class="island locked" id="island-1" onclick="enterIsland(1)">
+                <div class="island-icon">🏝️</div>
+                <div class="island-name">復沓島</div>
+                <div class="island-desc">疊句與音樂性<br>3道題目</div>
+            </div>
+            
+            <div class="island locked" id="island-2" onclick="enterIsland(2)">
+                <div class="island-icon">🏝️</div>
+                <div class="island-name">互文島</div>
+                <div class="island-desc">鋪陳與互文見義<br>3道題目</div>
+            </div>
+            
+            <div class="island locked" id="island-3" onclick="enterIsland(3)">
+                <div class="island-icon">🏝️</div>
+                <div class="island-name">詳略島</div>
+                <div class="island-desc">敘事剪裁技巧<br>3道題目</div>
+            </div>
+            
+            <div class="island locked" id="island-4" onclick="enterIsland(4)">
+                <div class="island-icon">🏝️</div>
+                <div class="island-name">對偶島</div>
+                <div class="island-desc">對仗與形式美<br>3道題目</div>
+            </div>
+            
+            <div class="boss-gate locked" id="boss-gate" onclick="enterBoss()">
+                <div class="island-icon">👑</div>
+                <div class="island-name">最終Boss</div>
+                <div class="island-desc">樂府詩鑑賞大師挑戰<br>（需集滿5個印章）</div>
+            </div>
+        </div>
+
+        <div class="action-buttons">
+            <button class="btn-secondary" onclick="showQR()">📱 生成QR碼回報</button>
+            <button class="btn-secondary" onclick="showLeaderboard()">🏅 排行榜</button>
+            <button class="btn-secondary" onclick="resetGame()">🔄 重新開始</button>
+        </div>
+    </div>
+
+    <!-- 關卡畫面 -->
+    <div id="level-screen" class="screen">
+        <div class="level-header">
+            <div style="flex:1">
+                <div id="level-title">韻律島 - 第1/3題</div>
+                <div class="progress-bar">
+                    <div class="progress-fill" id="level-progress" style="width: 0%"></div>
+                </div>
+                <div class="attempts-indicator" id="attempts-indicator">
+                    本島嘗試次數：第 <span id="attempt-count">1</span> 次 | 
+                    需答對 <span id="required-correct">2</span> 題才能過關
+                </div>
+            </div>
+            <button class="btn-secondary" onclick="backToMap()">↩️ 返回</button>
+        </div>
+
+        <div id="level-content">
+            <!-- 動態載入關卡內容 -->
+        </div>
+    </div>
+
+    <!-- 島嶼結果畫面 -->
+    <div id="island-result-screen" class="screen">
+        <div class="result-screen">
+            <div class="result-icon" id="result-icon">🏆</div>
+            <div class="result-title" id="result-title">島嶼挑戰完成！</div>
+            
+            <div class="result-stats" id="result-stats">
+                <!-- 動態填入 -->
+            </div>
+            
+            <div class="result-message" id="result-message">
+                <!-- 動態填入 -->
+            </div>
+            
+            <div id="result-buttons">
+                <!-- 動態填入按鈕 -->
+            </div>
+        </div>
+    </div>
+
+    <!-- QR碼畫面 -->
+    <div id="qr-screen" class="screen">
+        <h2>📱 請教師掃描收集進度</h2>
+        <canvas id="qr-canvas"></canvas>
+        
+        <div class="qr-instruction">
+            <p><strong>掃描後將傳送以下資料：</strong></p>
+            <ul style="margin-left: 20px; margin-top: 10px;">
+                <li>姓名：<span id="qr-name">-</span></li>
+                <li>班別：<span id="qr-class">-</span></li>
+                <li>總積分：<span id="qr-score">0</span></li>
+                <li>已獲印章：<span id="qr-stamps">0/5</span></li>
+                <li>完成島嶼：<span id="qr-islands">0</span>個</li>
+            </ul>
+        </div>
+        
+        <button class="btn-primary" onclick="backToMap()">↩️ 返回地圖</button>
+    </div>
+
+    <!-- 排行榜畫面 -->
+    <div id="leaderboard-screen" class="screen">
+        <h2>🏅 偵探金榜</h2>
+        <div class="leaderboard" id="leaderboard-list">
+            <p style="text-align: center; opacity: 0.7;">暫無其他玩家資料<br>（本機離線模式，僅顯示個人紀錄）</p>
+        </div>
+        <button class="btn-primary" onclick="backToMap()">↩️ 返回</button>
+    </div>
+
+    <script>
+        // ==================== 遊戲數據 ====================
+        
+        const islands = [
+            {
+                name: "韻律島",
+                icon: "🎵",
+                desc: "押韻與換韻技巧",
+                levels: [
+                    {
+                        type: "choice",
+                        title: "聽音辨韻",
+                        question: "《木蘭詩》開頭「唧唧復唧唧，木蘭當戶織」中，「唧」和「織」屬於什麼關係？",
+                        poem: "唧唧復唧唧，木蘭當戶織。",
+                        options: [
+                            { text: "A. 對偶關係", correct: false },
+                            { text: "B. 押韻關係（韻腳）", correct: true },
+                            { text: "C. 對比關係", correct: false },
+                            { text: "D. 沒有特殊關係", correct: false }
+                        ],
+                        explanation: "「唧」與「織」在古音中韻母相近，形成押韻，這是樂府詩的特點。",
+                        score: 100
+                    },
+                    {
+                        type: "choice",
+                        title: "換韻自由",
+                        question: "樂府詩與近體詩（唐詩）在押韻上的主要區別是？",
+                        options: [
+                            { text: "A. 樂府詩必須一韻到底", correct: false },
+                            { text: "B. 近體詩可以隨意換韻", correct: false },
+                            { text: "C. 樂府詩可以換韻，近體詩一般不能", correct: true },
+                            { text: "D. 兩者都必須押平聲韻", correct: false }
+                        ],
+                        explanation: "樂府詩作為古體詩，句式自由、可換韻；近體詩（律詩、絕句）則有嚴格格律。",
+                        score: 100
+                    },
+                    {
+                        type: "creative",
+                        title: "創作挑戰",
+                        question: "請用「ang韻」（如：光、香、方、長）仿寫一句樂府風格的句子，描述木蘭準備出征的心情。",
+                        hint: "提示：可參考「萬里赴戎機，關山度若飛」的節奏，五言或七言均可。",
+                        placeholder: "例如：身披戰甲光，心懷報國方...",
+                        checkKeywords: ["光", "香", "方", "長", "鄉", "堂", "郎", "裝"],
+                        minLength: 5,
+                        explanation: "樂府詩語言質樸自然，押韻寬鬆，重在表達真情實感。",
+                        score: 100
+                    }
+                ]
+            },
+            {
+                name: "復沓島",
+                icon: "🔄",
+                desc: "疊句與音樂性",
+                levels: [
+                    {
+                        type: "choice",
+                        title: "復沓獵人",
+                        question: "以下詩句運用了什麼修辭手法？\n「不聞爺孃喚女聲，但聞黃河流水鳴濺濺」\n「不聞爺孃喚女聲，但聞燕山胡騎聲啾啾」",
+                        poem: "不聞爺孃喚女聲，但聞黃河流水鳴濺濺。\n不聞爺孃喚女聲，但聞燕山胡騎聲啾啾。",
+                        options: [
+                            { text: "A. 對比", correct: false },
+                            { text: "B. 復沓（疊句）", correct: true },
+                            { text: "C. 誇張", correct: false },
+                            { text: "D. 比喻", correct: false }
+                        ],
+                        explanation: "「不聞爺孃喚女聲」重複出現，形成復沓，強化離家的孤獨感。",
+                        score: 100
+                    },
+                    {
+                        type: "choice",
+                        title: "復沓效果",
+                        question: "這種重複句式有什麼作用？（選出最正確的一項）",
+                        options: [
+                            { text: "A. 說明黃河聲音比父母呼喚大", correct: false },
+                            { text: "B. 強化木蘭離家的孤獨與思念，並營造音樂節奏", correct: true },
+                            { text: "C. 顯示木蘭記性不好", correct: false },
+                            { text: "D. 純粹為了湊字數", correct: false }
+                        ],
+                        explanation: "復沓既強化情感，又形成音樂性，這是樂府民歌的重要特色。",
+                        score: 100
+                    },
+                    {
+                        type: "matching",
+                        title: "配對挑戰",
+                        instruction: "請配對《木蘭詩》中的復沓句：",
+                        pairs: [
+                            { left: "不聞爺孃喚女聲", right: "但聞黃河流水鳴濺濺" },
+                            { left: "不聞爺孃喚女聲", right: "但聞燕山胡騎聲啾啾" },
+                            { left: "爺孃聞女來", right: "出郭相扶將" },
+                            { left: "阿姊聞妹來", right: "當戶理紅妝" }
+                        ],
+                        timeLimit: 60,
+                        score: 100
+                    }
+                ]
+            },
+            {
+                name: "互文島",
+                icon: "🔀",
+                desc: "鋪陳與互文見義",
+                levels: [
+                    {
+                        type: "choice",
+                        title: "互文見義",
+                        question: "「東市買駿馬，西市買鞍韉，南市買轡頭，北市買長鞭」中，「東西南北」的意思是？",
+                        poem: "東市買駿馬，西市買鞍韉，南市買轡頭，北市買長鞭。",
+                        options: [
+                            { text: "A. 木蘭真的跑了四個市場", correct: false },
+                            { text: "B. 到各處市場買齊裝備（互文見義）", correct: true },
+                            { text: "C. 形容市場很大", correct: false },
+                            { text: "D. 純粹為了押韻", correct: false }
+                        ],
+                        explanation: "「互文見義」指上下句互相補充，實際是到各處買齊裝備，非單一市場。",
+                        score: 100
+                    },
+                    {
+                        type: "choice",
+                        title: "鋪陳排比",
+                        question: "這四句運用了什麼手法？",
+                        options: [
+                            { text: "A. 對比", correct: false },
+                            { text: "B. 排比鋪陳（四句結構相似）", correct: false },
+                            { text: "C. 互文見義（互相補充）", correct: false },
+                            { text: "D. B和C都正確", correct: true }
+                        ],
+                        explanation: "排比強化氣勢，互文完善語義，共同表現木蘭準備的忙碌與周全。",
+                        score: 100
+                    },
+                    {
+                        type: "creative",
+                        title: "互文創作",
+                        question: "請用「東西南北」的互文手法，描述木蘭歸家後家人準備的情景。",
+                        hint: "提示：並非真在四個地方，而是到各處準備，互相補充意思。",
+                        placeholder: "例如：東廂備酒漿，西廂備衣裳，南廂備糕點，北廂備牛羊...",
+                        checkKeywords: ["東", "西", "南", "北", "備", "理", "整", "設"],
+                        minLength: 10,
+                        explanation: "互文見義讓語言簡潔而意蘊豐富，是樂府詩的精妙之處。",
+                        score: 100
+                    }
+                ]
+            },
+            {
+                name: "詳略島",
+                icon: "⚖️",
+                desc: "敘事剪裁技巧",
+                levels: [
+                    {
+                        type: "choice",
+                        title: "詳略對比",
+                        question: "比較以下兩段，為何征戰簡略而歸家詳細？\n\n征戰：「萬里赴戎機...將軍百戰死，壯士十年歸」（6句寫十年）\n歸家：「爺孃聞女來...磨刀霍霍向豬羊」（6句寫一瞬間）",
+                        options: [
+                            { text: "A. 突出主題：孝親與和平生活，而非戰爭本身", correct: true },
+                            { text: "B. 作者不會寫戰爭場面", correct: false },
+                            { text: "C. 征戰過程不重要", correct: false },
+                            { text: "D. 為了節省紙張", correct: false }
+                        ],
+                        explanation: "樂府詩重視表現親情與和平，戰爭只是背景，此為「詳略得當」。",
+                        score: 100
+                    },
+                    {
+                        type: "choice",
+                        title: "敘事特點",
+                        question: "這種「詳略得當」的敘事方式，體現了樂府詩的什麼特點？",
+                        options: [
+                            { text: "A. 字數限制嚴格", correct: false },
+                            { text: "B. 敘事性強，能按主題需要安排詳略", correct: true },
+                            { text: "C. 只會寫家庭場景", correct: false },
+                            { text: "D. 作者偷懶", correct: false }
+                        ],
+                        explanation: "樂府詩繼承《詩經》傳統，善於剪裁素材，突出核心主題。",
+                        score: 100
+                    },
+                    {
+                        type: "choice",
+                        title: "主題理解",
+                        question: "《木蘭詩》的核心主題是什麼？",
+                        options: [
+                            { text: "A. 歌頌戰爭英雄", correct: false },
+                            { text: "B. 表現孝道與和平生活的可貴", correct: true },
+                            { text: "C. 描寫軍旅生活", correct: false },
+                            { text: "D. 批評封建社會", correct: false }
+                        ],
+                        explanation: "詩中詳寫歸家親情，略寫戰爭殺戮，體現反戰與重孝的思想。",
+                        score: 100
+                    }
+                ]
+            },
+            {
+                name: "對偶島",
+                icon: "⚡",
+                desc: "對仗與形式美",
+                levels: [
+                    {
+                        type: "matching",
+                        title: "對偶配對",
+                        instruction: "請配對《木蘭詩》中的對偶句（限時60秒）：",
+                        pairs: [
+                            { left: "朔氣傳金柝", right: "寒光照鐵衣" },
+                            { left: "萬里赴戎機", right: "關山度若飛" },
+                            { left: "將軍百戰死", right: "壯士十年歸" },
+                            { left: "當戶理紅妝", right: "磨刀霍霍向豬羊" }
+                        ],
+                        timeLimit: 60,
+                        score: 100
+                    },
+                    {
+                        type: "choice",
+                        title: "對偶分析",
+                        question: "「朔氣傳金柝，寒光照鐵衣」中，「朔氣」對「寒光」屬於什麼對法？",
+                        options: [
+                            { text: "A. 動詞對動詞", correct: false },
+                            { text: "B. 名詞對名詞（偏正結構）", correct: true },
+                            { text: "C. 形容詞對形容詞", correct: false },
+                            { text: "D. 不是對偶", correct: false }
+                        ],
+                        explanation: "「朔（北方）氣」對「寒（寒冷）光」，皆為偏正名詞短語，詞性相對。",
+                        score: 100
+                    },
+                    {
+                        type: "creative",
+                        title: "對偶創作",
+                        question: "請為「木蘭歸家」場景創作一組對偶句。",
+                        hint: "提示：上句寫家人動作，下句寫木蘭反應，注意詞性相對。",
+                        placeholder: "例如：爺孃開笑顏，木蘭整舊裳...",
+                        checkKeywords: ["，", "。", "對", "來", "去", "開", "整", "理"],
+                        minLength: 10,
+                        explanation: "對偶讓句式整齊，音韻和諧，增強表達效果。",
+                        score: 100
+                    }
+                ]
+            }
+        ];
+
+        const bossLevel = {
+            name: "樂府詩鑑賞大師",
+            icon: "👑",
+            levels: [
+                {
+                    type: "choice",
+                    title: "綜合挑戰 1/3",
+                    question: "以下哪項最能概括《木蘭詩》的體裁特點？",
+                    options: [
+                        { text: "A. 格律嚴謹的七言律詩", correct: false },
+                        { text: "B. 句式自由、敘事性強的樂府民歌", correct: true },
+                        { text: "C. 豪放派的宋詞", correct: false },
+                        { text: "D. 婉約派的元曲", correct: false }
+                    ],
+                    score: 100
+                },
+                {
+                    type: "choice",
+                    title: "綜合挑戰 2/3",
+                    question: "《木蘭詩》中同時運用多種手法，以下哪組組合正確？",
+                    options: [
+                        { text: "A. 復沓+互文+對偶+詳略得當", correct: true },
+                        { text: "B. 比喻+擬人+誇張+設問", correct: false },
+                        { text: "C. 反問+排比+對比+象徵", correct: false },
+                        { text: "D. 只有敘事，沒有修辭", correct: false }
+                    ],
+                    score: 100
+                },
+                {
+                    type: "creative",
+                    title: "最終挑戰 3/3",
+                    question: "請用50-100字，以「我眼中的木蘭」為題，運用至少兩種今天學到的技巧（復沓、互文、對偶、詳略），評價木蘭這個人物。",
+                    hint: "提示：可運用對偶句描述她的雙重身份（戰士/女兒），或用復沓強化情感。",
+                    placeholder: "木蘭者，女兒身，男兒志。當戶織，聞軍書，心憂國...",
+                    checkKeywords: ["木蘭", "孝", "勇", "國", "家"],
+                    minLength: 30,
+                    score: 100
+                }
+            ]
+        };
+
+        // ==================== 遊戲狀態管理（修改：加入嘗試次數） ====================
+        
+        let gameState = {
+            player: {
+                name: '',
+                class: '',
+                score: 0,
+                stamps: [false, false, false, false, false],
+                currentIsland: 0,
+                currentLevel: 0,
+                completedLevels: [[], [], [], [], []],
+                islandAttempts: [0, 0, 0, 0, 0], // 每島嘗試次數
+                islandResults: [null, null, null, null, null], // 每島結果：null/pass/fail
+                creativeWorks: [[], [], [], [], []],
+                timestamp: null
+            }
+        };
+
+        let currentIsland = 0;
+        let currentLevelIndex = 0;
+        let tempScore = 0;
+        let islandCorrectCount = 0; // 當前島嶼答對題數
+        let islandTotalScore = 0; // 當前島嶼總分
+        let matchingState = { selected: null, matched: [] };
+
+        // ==================== 初始化與儲存 ====================
+
+        function init() {
+            const saved = localStorage.getItem('mulanDetective');
+            if (saved) {
+                gameState = JSON.parse(saved);
+                // 相容舊資料：若沒有islandAttempts則初始化
+                if (!gameState.player.islandAttempts) {
+                    gameState.player.islandAttempts = [0, 0, 0, 0, 0];
+                }
+                if (!gameState.player.islandResults) {
+                    gameState.player.islandResults = [null, null, null, null, null];
+                }
+            }
+        }
+
+        function saveGame() {
+            gameState.player.timestamp = new Date().toISOString();
+            localStorage.setItem('mulanDetective', JSON.stringify(gameState));
+        }
+
+        function startGame() {
+            const name = document.getElementById('player-name').value.trim();
+            const cls = document.getElementById('player-class').value.trim();
+            
+            if (!name || !cls) {
+                alert('請輸入姓名和班別！');
+                return;
+            }
+            
+            gameState.player.name = name;
+            gameState.player.class = cls;
+            saveGame();
+            
+            showScreen('map-screen');
+            updateMap();
+        }
+
+        function loadGame() {
+            const saved = localStorage.getItem('mulanDetective');
+            if (!saved) {
+                alert('沒有找到儲存的進度！');
+                return;
+            }
+            
+            gameState = JSON.parse(saved);
+            // 相容舊資料
+            if (!gameState.player.islandAttempts) {
+                gameState.player.islandAttempts = [0, 0, 0, 0, 0];
+            }
+            if (!gameState.player.islandResults) {
+                gameState.player.islandResults = [null, null, null, null, null];
+            }
+            
+            showScreen('map-screen');
+            updateMap();
+        }
+
+        function resetGame() {
+            if (!confirm('確定要重新開始？所有進度將會清除！')) return;
+            
+            localStorage.removeItem('mulanDetective');
+            location.reload();
+        }
+
+        // ==================== 畫面切換 ====================
+
+        function showScreen(screenId) {
+            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+            document.getElementById(screenId).classList.add('active');
+            
+            if (screenId === 'map-screen') {
+                updateMap();
+            }
+        }
+
+        function updateMap() {
+            document.getElementById('display-name').textContent = gameState.player.name || '-';
+            document.getElementById('display-score').textContent = gameState.player.score;
+            
+            const stampCount = gameState.player.stamps.filter(s => s).length;
+            document.getElementById('display-stamps').textContent = `${stampCount}/5`;
+            
+            // 更新島嶼狀態
+            for (let i = 0; i < 5; i++) {
+                const island = document.getElementById(`island-${i}`);
+                const isLocked = i > 0 && !gameState.player.stamps[i-1];
+                const isCompleted = gameState.player.stamps[i];
+                const isFailed = gameState.player.islandResults[i] === 'fail';
+                const attempts = gameState.player.islandAttempts[i] || 0;
+                
+                island.classList.remove('locked', 'completed', 'failed');
+                
+                // 清除舊標籤
+                island.querySelector('.stamp')?.remove();
+                island.querySelector('.retry-badge')?.remove();
+                
+                if (isLocked) {
+                    island.classList.add('locked');
+                } else if (isCompleted) {
+                    island.classList.add('completed');
+                    const stamp = document.createElement('div');
+                    stamp.className = 'stamp';
+                    stamp.textContent = islands[i].icon;
+                    island.appendChild(stamp);
+                } else if (isFailed && attempts > 0) {
+                    island.classList.add('failed');
+                    const badge = document.createElement('div');
+                    badge.className = 'retry-badge';
+                    badge.textContent = `重試${attempts}`;
+                    island.appendChild(badge);
+                }
+            }
+            
+            // 更新Boss關
+            const bossGate = document.getElementById('boss-gate');
+            const allStamps = gameState.player.stamps.every(s => s);
+            bossGate.classList.remove('locked', 'unlocked');
+            if (allStamps) {
+                bossGate.classList.add('unlocked');
+            } else {
+                bossGate.classList.add('locked');
+            }
+        }
+
+        // ==================== 島嶼關卡（修改：錯誤過半需重答） ====================
+
+        function enterIsland(index) {
+            // 檢查解鎖
+            if (index > 0 && !gameState.player.stamps[index-1]) {
+                alert('請先完成前一個島嶼！');
+                return;
+            }
+            
+            // 檢查是否已完成
+            if (gameState.player.stamps[index]) {
+                alert('你已經完成這個島嶼！可以挑戰其他島嶼。');
+                return;
+            }
+            
+            currentIsland = index;
+            
+            // 初始化島嶼挑戰狀態
+            islandCorrectCount = 0;
+            islandTotalScore = 0;
+            currentLevelIndex = 0;
+            
+            // 增加嘗試次數
+            gameState.player.islandAttempts[index] = (gameState.player.islandAttempts[index] || 0) + 1;
+            gameState.player.islandResults[index] = null; // 重置結果
+            saveGame();
+            
+            loadLevel();
+        }
+
+        function enterBoss() {
+            const allStamps = gameState.player.stamps.every(s => s);
+            if (!allStamps) {
+                alert('請先集滿5個印章！');
+                return;
+            }
+            
+            currentIsland = 99; // Boss標記
+            currentLevelIndex = 0;
+            islandCorrectCount = 0;
+            islandTotalScore = 0;
+            loadBossLevel();
+        }
+
+        function loadLevel() {
+            const level = islands[currentIsland].levels[currentLevelIndex];
+            const totalLevels = islands[currentIsland].levels.length;
+            const attemptCount = gameState.player.islandAttempts[currentIsland] || 1;
+            
+            document.getElementById('level-title').textContent = 
+                `${islands[currentIsland].name} - 第${currentLevelIndex + 1}/${totalLevels}題`;
+            
+            document.getElementById('attempt-count').textContent = attemptCount;
+            document.getElementById('required-correct').textContent = Math.ceil(totalLevels / 2);
+            
+            // 更新嘗試指示器樣式
+            const indicator = document.getElementById('attempts-indicator');
+            if (attemptCount > 1) {
+                indicator.classList.add('danger');
+            } else {
+                indicator.classList.remove('danger');
+            }
+            
+            updateProgress();
+            renderLevel(level);
+            showScreen('level-screen');
+        }
+
+        function loadBossLevel() {
+            const level = bossLevel.levels[currentLevelIndex];
+            const totalLevels = bossLevel.levels.length;
+            
+            document.getElementById('level-title').textContent = 
+                `👑 最終Boss - 第${currentLevelIndex + 1}/${totalLevels}題`;
+            document.getElementById('attempt-count').textContent = '-';
+            document.getElementById('required-correct').textContent = Math.ceil(totalLevels / 2);
+            
+            updateProgress();
+            renderLevel(level);
+            showScreen('level-screen');
+        }
+
+        function updateProgress() {
+            const totalLevels = currentIsland === 99 ? bossLevel.levels.length : islands[currentIsland].levels.length;
+            const progress = ((currentLevelIndex) / totalLevels) * 100;
+            document.getElementById('level-progress').style.width = `${progress}%`;
+        }
+
+        function renderLevel(level) {
+            const container = document.getElementById('level-content');
+            container.innerHTML = '';
+            
+            const title = document.createElement('h3');
+            title.textContent = level.title;
+            title.style.marginBottom = '15px';
+            container.appendChild(title);
+            
+            const questionDiv = document.createElement('div');
+            questionDiv.className = 'question-container';
+            
+            const questionText = document.createElement('div');
+            questionText.className = 'question-text';
+            questionText.textContent = level.question;
+            questionDiv.appendChild(questionText);
+            
+            if (level.poem) {
+                const poem = document.createElement('div');
+                poem.className = 'question-poem';
+                poem.innerHTML = level.poem.replace(/\n/g, '<br>');
+                questionDiv.appendChild(poem);
+            }
+            
+            // 根據題型渲染
+            if (level.type === 'choice') {
+                renderChoice(questionDiv, level);
+            } else if (level.type === 'matching') {
+                renderMatching(questionDiv, level);
+            } else if (level.type === 'creative') {
+                renderCreative(questionDiv, level);
+            }
+            
+            container.appendChild(questionDiv);
+        }
+
+        function renderChoice(container, level) {
+            const optionsDiv = document.createElement('div');
+            optionsDiv.className = 'options';
+            
+            level.options.forEach((opt, idx) => {
+                const btn = document.createElement('button');
+                btn.className = 'option-btn';
+                btn.textContent = opt.text;
+                btn.onclick = () => checkAnswer(idx, level);
+                optionsDiv.appendChild(btn);
+            });
+            
+            container.appendChild(optionsDiv);
+        }
+
+        function renderMatching(container, level) {
+            const instruction = document.createElement('p');
+            instruction.style.marginBottom = '15px';
+            instruction.textContent = level.instruction;
+            container.appendChild(instruction);
+            
+            const matchingDiv = document.createElement('div');
+            matchingDiv.className = 'matching-container';
+            matchingDiv.id = 'matching-game';
+            
+            // 打亂順序
+            const items = [];
+            level.pairs.forEach((pair, idx) => {
+                items.push({ text: pair.left, type: 'left', pairId: idx });
+                items.push({ text: pair.right, type: 'right', pairId: idx });
+            });
+            items.sort(() => Math.random() - 0.5);
+            
+            items.forEach(item => {
+                const div = document.createElement('div');
+                div.className = 'matching-item';
+                div.textContent = item.text;
+                div.dataset.pairId = item.pairId;
+                div.dataset.type = item.type;
+                div.onclick = () => handleMatching(div, level);
+                matchingDiv.appendChild(div);
+            });
+            
+            container.appendChild(matchingDiv);
+            
+            // 計時器
+            if (level.timeLimit) {
+                const timer = document.createElement('div');
+                timer.id = 'matching-timer';
+                timer.textContent = `剩餘時間：${level.timeLimit}秒`;
+                timer.style.textAlign = 'center';
+                timer.style.marginTop = '15px';
+                timer.style.fontSize = '1.2em';
+                container.appendChild(timer);
+                
+                let timeLeft = level.timeLimit;
+                const interval = setInterval(() => {
+                    timeLeft--;
+                    timer.textContent = `剩餘時間：${timeLeft}秒`;
+                    if (timeLeft <= 0 || matchingState.matched.length === level.pairs.length) {
+                        clearInterval(interval);
+                        if (matchingState.matched.length < level.pairs.length) {
+                            endMatching(level, false);
+                        }
+                    }
+                }, 1000);
+            }
+        }
+
+        function renderCreative(container, level) {
+            const hint = document.createElement('div');
+            hint.className = 'creative-hint';
+            hint.textContent = level.hint;
+            container.appendChild(hint);
+            
+            const textarea = document.createElement('textarea');
+            textarea.className = 'creative-input';
+            textarea.rows = 4;
+            textarea.placeholder = level.placeholder;
+            textarea.id = 'creative-answer';
+            container.appendChild(textarea);
+            
+            const submitBtn = document.createElement('button');
+            submitBtn.className = 'btn-primary';
+            submitBtn.textContent = '提交創作';
+            submitBtn.style.marginTop = '15px';
+            submitBtn.onclick = () => checkCreative(level);
+            container.appendChild(submitBtn);
+        }
+
+        // ==================== 答案檢查 ====================
+
+        function checkAnswer(selectedIdx, level) {
+            const options = document.querySelectorAll('.option-btn');
+            const selected = level.options[selectedIdx];
+            const isCorrect = selected.correct;
+            
+            options.forEach((btn, idx) => {
+                btn.classList.add('disabled');
+                if (level.options[idx].correct) {
+                    btn.classList.add('correct');
+                } else if (idx === selectedIdx && !isCorrect) {
+                    btn.classList.add('wrong');
+                }
+            });
+            
+            if (isCorrect) {
+                islandCorrectCount++;
+                islandTotalScore += level.score;
+            }
+            
+            // 延遲後進入下一題
+            setTimeout(() => {
+                nextLevelInIsland();
+            }, 1500);
+        }
+
+        function handleMatching(element, level) {
+            if (element.classList.contains('matched')) return;
+            
+            if (!matchingState.selected) {
+                matchingState.selected = element;
+                element.classList.add('selected');
+            } else {
+                const prev = matchingState.selected;
+                const current = element;
+                
+                if (prev.dataset.pairId === current.dataset.pairId && 
+                    prev.dataset.type !== current.dataset.type) {
+                    prev.classList.remove('selected');
+                    prev.classList.add('matched');
+                    current.classList.add('matched');
+                    matchingState.matched.push(prev.dataset.pairId);
+                    
+                    if (matchingState.matched.length === level.pairs.length) {
+                        islandCorrectCount++;
+                        islandTotalScore += level.score;
+                        setTimeout(() => {
+                            matchingState = { selected: null, matched: [] };
+                            nextLevelInIsland();
+                        }, 500);
+                    }
+                } else {
+                    prev.classList.remove('selected');
+                    prev.classList.add('shake');
+                    current.classList.add('shake');
+                    setTimeout(() => {
+                        prev.classList.remove('shake');
+                        current.classList.remove('shake');
+                    }, 500);
+                }
+                
+                matchingState.selected = null;
+            }
+        }
+
+        function endMatching(level, success) {
+            const items = document.querySelectorAll('.matching-item');
+            items.forEach(item => item.style.pointerEvents = 'none');
+            
+            if (success) {
+                // 已在handleMatching中計分
+            } else {
+                // 時間到，未全部配對，不算答對
+            }
+            
+            setTimeout(() => {
+                matchingState = { selected: null, matched: [] };
+                nextLevelInIsland();
+            }, 1000);
+        }
+
+        function checkCreative(level) {
+            const answer = document.getElementById('creative-answer').value.trim();
+            
+            if (answer.length < level.minLength) {
+                alert(`請至少輸入${level.minLength}個字！`);
+                return;
+            }
+            
+            const hasKeyword = level.checkKeywords.some(kw => answer.includes(kw));
+            
+            if (currentIsland !== 99) {
+                gameState.player.creativeWorks[currentIsland][currentLevelIndex] = answer;
+            }
+            
+            // 創作題只要完成即算答對（鼓勵性質）
+            islandCorrectCount++;
+            islandTotalScore += level.score;
+            
+            nextLevelInIsland();
+        }
+
+        // ==================== 修改：島嶼內關卡推進與結果判定 ====================
+
+        function nextLevelInIsland() {
+            const totalLevels = currentIsland === 99 ? bossLevel.levels.length : islands[currentIsland].levels.length;
+            
+            if (currentLevelIndex < totalLevels - 1) {
+                // 還有下一題
+                currentLevelIndex++;
+                if (currentIsland === 99) {
+                    loadBossLevel();
+                } else {
+                    loadLevel();
+                }
+            } else {
+                // 島嶼完成，判定結果
+                finishIsland();
+            }
+        }
+
+        function finishIsland() {
+            const totalLevels = islands[currentIsland].levels.length;
+            const requiredCorrect = Math.ceil(totalLevels / 2); // 過半數
+            const isPass = islandCorrectCount >= requiredCorrect;
+            
+            // 儲存結果
+            gameState.player.islandResults[currentIsland] = isPass ? 'pass' : 'fail';
+            
+            if (isPass) {
+                // 通過：獲得印章，累積積分
+                gameState.player.stamps[currentIsland] = true;
+                gameState.player.score += islandTotalScore;
+                showIslandResult(true, islandCorrectCount, totalLevels, islandTotalScore);
+            } else {
+                // 未通過：標記失敗，不獲得印章，不保留積分
+                showIslandResult(false, islandCorrectCount, totalLevels, 0);
+            }
+            
+            saveGame();
+        }
+
+        function showIslandResult(isPass, correctCount, totalLevels, score) {
+            const screen = document.getElementById('island-result-screen');
+            const icon = document.getElementById('result-icon');
+            const title = document.getElementById('result-title');
+            const stats = document.getElementById('result-stats');
+            const message = document.getElementById('result-message');
+            const buttons = document.getElementById('result-buttons');
+            
+            if (isPass) {
+                icon.textContent = '🏆';
+                title.textContent = `${islands[currentIsland].name} 挑戰成功！`;
+                title.style.color = '#38ef7d';
+                
+                stats.innerHTML = `
+                    <div class="stat-row">
+                        <span>答對題數</span>
+                        <span>${correctCount}/${totalLevels}</span>
+                    </div>
+                    <div class="stat-row">
+                        <span>獲得積分</span>
+                        <span>+${score}</span>
+                    </div>
+                    <div class="stat-row">
+                        <span>獲得印章</span>
+                        <span>${islands[currentIsland].icon}</span>
+                    </div>
+                `;
+                
+                message.className = 'result-message success';
+                message.innerHTML = `
+                    <strong>恭喜過關！</strong><br>
+                    你已掌握${islands[currentIsland].desc}，可以挑戰下一個島嶼了！
+                `;
+                
+                buttons.innerHTML = `
+                    <button class="btn-primary" onclick="backToMap()">🗺️ 返回地圖</button>
+                `;
+            } else {
+                icon.textContent = '💪';
+                title.textContent = `${islands[currentIsland].name} 挑戰失敗`;
+                title.style.color = '#f45c43';
+                
+                stats.innerHTML = `
+                    <div class="stat-row">
+                        <span>答對題數</span>
+                        <span>${correctCount}/${totalLevels}</span>
+                    </div>
+                    <div class="stat-row">
+                        <span>需要答對</span>
+                        <span>${Math.ceil(totalLevels / 2)}題</span>
+                    </div>
+                    <div class="stat-row">
+                        <span>目前嘗試次數</span>
+                        <span>第 ${gameState.player.islandAttempts[currentIsland]} 次</span>
+                    </div>
+                `;
+                
+                message.className = 'result-message fail';
+                message.innerHTML = `
+                    <strong>再接再厲！</strong><br>
+                    你需要答對<strong>過半數題目</strong>（${Math.ceil(totalLevels / 2)}題）才能過關。<br>
+                    請重新挑戰，加深理解！
+                `;
+                
+                buttons.innerHTML = `
+                    <button class="btn-warning" onclick="retryIsland()">🔄 重新挑戰</button>
+                    <button class="btn-secondary" onclick="backToMap()">🗺️ 稍後再試</button>
+                `;
+            }
+            
+            showScreen('island-result-screen');
+        }
+
+        function retryIsland() {
+            // 重置島嶼挑戰狀態，重新進入
+            islandCorrectCount = 0;
+            islandTotalScore = 0;
+            currentLevelIndex = 0;
+            enterIsland(currentIsland);
+        }
+
+        function finishBoss() {
+            const totalLevels = bossLevel.levels.length;
+            const requiredCorrect = Math.ceil(totalLevels / 2);
+            const isPass = islandCorrectCount >= requiredCorrect;
+            
+            if (isPass) {
+                gameState.player.score += islandTotalScore;
+                saveGame();
+                
+                alert(`🎉 恭喜你成為「樂府詩鑑賞大師」！\n最終積分：${gameState.player.score}`);
+                backToMap();
+            } else {
+                alert(`💪 Boss挑戰失敗！\n答對${islandCorrectCount}/${totalLevels}題，需要${requiredCorrect}題\n請重新挑戰！`);
+                currentIsland = 99;
+                currentLevelIndex = 0;
+                islandCorrectCount = 0;
+                islandTotalScore = 0;
+                loadBossLevel();
+            }
+        }
+
+        // Boss關的nextLevel修改
+        const originalNextLevelInIsland = nextLevelInIsland;
+        nextLevelInIsland = function() {
+            if (currentIsland === 99) {
+                const totalLevels = bossLevel.levels.length;
+                if (currentLevelIndex >= totalLevels - 1) {
+                    finishBoss();
+                    return;
+                }
+            }
+            originalNextLevelInIsland();
+        };
+
+        function backToMap() {
+            showScreen('map-screen');
+        }
+
+        // ==================== QR碼與其他功能 ====================
+
+        function showQR() {
+            const data = {
+                n: gameState.player.name,
+                c: gameState.player.class,
+                s: gameState.player.score,
+                stamps: gameState.player.stamps.filter(s => s).length,
+                islands: gameState.player.stamps.filter(s => s).length,
+                attempts: gameState.player.islandAttempts,
+                t: new Date().toISOString()
+            };
+            
+            const qrData = JSON.stringify(data);
+            
+            document.getElementById('qr-name').textContent = data.n;
+            document.getElementById('qr-class').textContent = data.c;
+            document.getElementById('qr-score').textContent = data.s;
+            document.getElementById('qr-stamps').textContent = `${data.stamps}/5`;
+            document.getElementById('qr-islands').textContent = data.islands;
+            
+            const qr = new QRious({
+                element: document.getElementById('qr-canvas'),
+                value: qrData,
+                size: 250,
+                background: 'white',
+                foreground: 'black'
+            });
+            
+            showScreen('qr-screen');
+        }
+
+        function showLeaderboard() {
+            const list = document.getElementById('leaderboard-list');
+            
+            // 顯示個人統計
+            const attempts = gameState.player.islandAttempts || [0,0,0,0,0];
+            const results = gameState.player.islandResults || [null,null,null,null,null];
+            
+            let progressHtml = '<div style="margin-bottom:20px;">';
+            for (let i = 0; i < 5; i++) {
+                const status = results[i] === 'pass' ? '✅' : 
+                              results[i] === 'fail' ? `❌(重試${attempts[i]}次)` : 
+                              attempts[i] > 0 ? `🔄進行中` : '🔒';
+                progressHtml += `<div style="padding:8px;background:rgba(255,255,255,0.1);margin:5px 0;border-radius:8px;">
+                    ${islands[i].icon} ${islands[i].name}: ${status}
+                </div>`;
+            }
+            progressHtml += '</div>';
+            
+            list.innerHTML = `
+                <div class="leaderboard-item top3">
+                    <span>🥇 ${gameState.player.name} (${gameState.player.class})</span>
+                    <span>${gameState.player.score}分</span>
+                </div>
+                ${progressHtml}
+                <div style="text-align:center;opacity:0.7;font-size:0.9em;">
+                    規則：每島需答對過半數（2/3題）才能過關<br>
+                    失敗可無限重試，加深學習效果
+                </div>
+            `;
+            showScreen('leaderboard-screen');
+        }
+
+        // ==================== 初始化 ====================
+
+        window.onload = init;
+    </script>
+</body>
+</html>
